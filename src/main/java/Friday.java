@@ -48,6 +48,7 @@ public class Friday {
                 else if (cmd.startsWith("todo")) { addTodo(cmd); }
                 else if (cmd.startsWith("deadline")) { addDeadline(cmd); }
                 else if (cmd.startsWith("event")) { addEvent(cmd); }
+                else if (cmd.startsWith("delete ")) { removeEvent(cmd); }
                 else {
                     throw new FridayException("What talk you bro");
                 }
@@ -58,6 +59,24 @@ public class Friday {
     }
 
     // ----- Command handlers (throw on bad input) -----
+    private static void removeEvent(String cmd) throws FridayException {
+        String index = cmd.substring(6).trim();
+        int n;
+        try {
+            n = Integer.parseInt(index);
+        } catch (NumberFormatException e) {
+            throw new FridayException("Valid number please...");
+        }
+        if (n < 1 || n > tasks.size()) {
+            throw new FridayException("You don't even know how many tasks you have???");
+        }
+        Task toRemove = tasks.get(n - 1);
+        tasks.remove(n - 1);
+        int newTaskSize = tasks.size();
+        box("Noted. I've removed this task:",
+                toRemove.display(),
+                "Now you have " + (newTaskSize) + " tasks in the list.");
+    }
     private static void addTodo(String cmd) throws FridayException {
         String rest = cmd.length() >= 4 ? cmd.substring(4) : "";
         String desc = rest.startsWith(" ") ? rest.substring(1).trim() : rest.trim();
