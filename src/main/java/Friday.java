@@ -7,10 +7,24 @@ public class Friday {
     private static final String LINE = "____________________________________________________________";
 
     public static void main(String[] args) {
-        System.out.println("Hello! I'm Friday");
-        System.out.println("What can I do for you?");
+        box(" Hello! I'm Friday", " What can I do for you?");
+
+        Scanner sc = new Scanner(System.in);
+        while (sc.hasNextLine()) {
+            String input = sc.nextLine();
+
+            if (input.equals("bye")) {
+                System.out.println("Bye. Hope to see you again soon!");
+                break;
+            } else {
+                box(input);
+            }
+        }
+    }
+
+    private static void box(String... lines) {
         System.out.println(LINE);
-        System.out.println("Bye. Hope to see you again soon!");
+        for (String l : lines) System.out.println(l);
         System.out.println(LINE);
     }
 }
