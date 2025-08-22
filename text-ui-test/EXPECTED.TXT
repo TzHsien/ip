@@ -14,14 +14,14 @@ ____________________________________________________________
 ____________________________________________________________
 ____________________________________________________________
  Got it. I've added this task:
-   [E][ ] project meeting (from: Mon 2pm to: 4pm)
+   [E][ ] project meeting (from: Mon 3pm to: 5pm)
  Now you have 3 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
  Here are the tasks in your list:
  1.[T][ ] read book
  2.[D][ ] return book (by: Sunday)
- 3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+ 3.[E][ ] project meeting (from: Mon 3pm to: 5pm)
 ____________________________________________________________
 ____________________________________________________________
  Nice! I've marked this task as done:

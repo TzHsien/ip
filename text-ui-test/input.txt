@@ -1,6 +1,6 @@
 todo read book
 deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+event project meeting /from Mon 3pm /to 5pm
 list
 mark 2
 unmark 2
