@@ -5,17 +5,14 @@ import java.util.Scanner;
 public class Friday {
     private static final String LINE = "____________________________________________________________";
 
-    // ----- Task model -----
     private static abstract class Task {
         final String desc;
         boolean done;
         Task(String d) { this.desc = d; }
         abstract String typeIcon();                  // [T], [D], [E]
         String statusIcon() { return done ? "[X]" : "[ ]"; }
-        String extra() { return ""; }                // for deadlines/events
-        String display() {
-            return typeIcon() + statusIcon() + " " + desc + extra();
-        }
+        String extra() { return ""; }
+        String display() { return typeIcon() + statusIcon() + " " + desc + extra(); }
     }
     private static class ToDo extends Task {
         ToDo(String d) { super(d); }
@@ -44,46 +41,88 @@ public class Friday {
             String cmd = sc.nextLine().trim();
             if (cmd.isEmpty()) continue;
 
-            if (cmd.equals("bye")) { box(" Bye. Hope to see you again soon!"); break; }
-            if (cmd.equals("list")) { showList(); continue; }
-            if (cmd.startsWith("mark ") || cmd.startsWith("unmark ")) { toggle(cmd); continue; }
-
-            if (cmd.startsWith("todo ")) {
-                String desc = cmd.substring(5).trim();
-                if (desc.isEmpty()) { box(" Usage: todo <description>"); continue; }
-                addTask(new ToDo(desc));
-            } else if (cmd.startsWith("deadline ")) {
-                String rest = cmd.substring(9).trim();
-                int i = indexOfToken(rest, "/by");
-                if (i < 0) { box(" Usage: deadline <description> /by <when>"); continue; }
-                String desc = rest.substring(0, i).trim();
-                String by = rest.substring(i + 3).trim();  // after "/by"
-                if (desc.isEmpty() || by.isEmpty()) { box(" Usage: deadline <description> /by <when>"); continue; }
-                addTask(new Deadline(desc, by));
-            } else if (cmd.startsWith("event ")) {
-                String rest = cmd.substring(6).trim();
-                int iFrom = indexOfToken(rest, "/from");
-                int iTo   = indexOfToken(rest, "/to");
-                if (iFrom < 0 || iTo < 0 || iTo <= iFrom) { box(" Usage: event <desc> /from <start> /to <end>"); continue; }
-                String desc = rest.substring(0, iFrom).trim();
-                String from = rest.substring(iFrom + 5, iTo).trim(); // after "/from"
-                String to   = rest.substring(iTo + 3).trim();        // after "/to"
-                if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) { box(" Usage: event <desc> /from <start> /to <end>"); continue; }
-                addTask(new Event(desc, from, to));
-            } else {
-                // Fallback: treat as a quick ToDo to remain user-friendly
-                addTask(new ToDo(cmd));
+            try {
+                if (cmd.equals("bye")) { box(" Bye. Hope to see you again soon!"); break; }
+                else if (cmd.equals("list")) { showList(); }
+                else if (cmd.startsWith("mark ") || cmd.startsWith("unmark ")) { toggle(cmd); }
+                else if (cmd.startsWith("todo")) { addTodo(cmd); }
+                else if (cmd.startsWith("deadline")) { addDeadline(cmd); }
+                else if (cmd.startsWith("event")) { addEvent(cmd); }
+                else {
+                    throw new FridayException("What talk you bro");
+                }
+            } catch (FridayException e) {
+                box(" " + e.getMessage());
             }
         }
     }
 
-    // Finds token index accepting either " /token " or "/token "
+    // ----- Command handlers (throw on bad input) -----
+    private static void addTodo(String cmd) throws FridayException {
+        String rest = cmd.length() >= 4 ? cmd.substring(4) : "";
+        String desc = rest.startsWith(" ") ? rest.substring(1).trim() : rest.trim();
+        if (desc.isEmpty()) {
+            throw new FridayException("Walao how can a task be empty OII!");
+        }
+        addTask(new ToDo(desc));
+    }
+
+    private static void addDeadline(String cmd) throws FridayException {
+        // "deadline <desc> /by <when>"
+        String rest = cmd.substring(8).trim();
+        int i = indexOfToken(rest, "/by");
+        if (i < 0) throw new FridayException("Eh you blur or what where's your deadline");
+        String desc = rest.substring(0, i).trim();
+        String by = rest.substring(i + 3).trim();
+        if (desc.isEmpty() || by.isEmpty()) {
+            throw new FridayException("Walao do you know how to fill in a deadline or not");
+        }
+        addTask(new Deadline(desc, by));
+    }
+
+    private static void addEvent(String cmd) throws FridayException {
+        // "event <desc> /from <start> /to <end>"
+        String rest = cmd.substring(5).trim();
+        int iFrom = indexOfToken(rest, "/from");
+        int iTo   = indexOfToken(rest, "/to");
+        if (iFrom < 0 || iTo < 0 || iTo <= iFrom) {
+            throw new FridayException("Bro you need to type from and to for me to know your event time");
+        }
+        String desc = rest.substring(0, iFrom).trim();
+        String from = rest.substring(iFrom + 5, iTo).trim();
+        String to   = rest.substring(iTo + 3).trim();
+        if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
+            throw new FridayException("Bro you know how to give event time or not");
+        }
+        addTask(new Event(desc, from, to));
+    }
+
+    private static void toggle(String cmd) throws FridayException {
+        boolean mark = cmd.startsWith("mark ");
+        String nStr = cmd.substring(mark ? 5 : 7).trim();
+        int n;
+        try {
+            n = Integer.parseInt(nStr);
+        } catch (NumberFormatException e) {
+            throw new FridayException("OOPS!!! Please provide a valid task number.");
+        }
+        if (n < 1 || n > tasks.size()) {
+            throw new FridayException("OOPS!!! That task number does not exist.");
+        }
+        Task t = tasks.get(n - 1);
+        t.done = mark;
+        box(mark ? " Nice! I've marked this task as done:"
+                        : " OK, I've marked this task as not done yet:",
+                "   " + t.display());
+    }
+
+    // ----- Helpers -----
     private static int indexOfToken(String s, String token) {
         int i = s.indexOf(" " + token + " ");
-        if (i >= 0) return i + 1;                // skip the leading space
+        if (i >= 0) return i + 1;
         i = s.indexOf(token + " ");
         if (i >= 0) return i;
-        i = s.indexOf(" " + token);              // allow end-of-line after token
+        i = s.indexOf(" " + token);
         if (i >= 0) return i + 1;
         return s.indexOf(token);
     }
@@ -103,22 +142,6 @@ public class Friday {
             lines.add(" " + (i + 1) + "." + tasks.get(i).display());
         }
         box(lines.toArray(new String[0]));
-    }
-
-    private static void toggle(String cmd) {
-        boolean mark = cmd.startsWith("mark ");
-        String nStr = cmd.substring(mark ? 5 : 7).trim();
-        try {
-            int n = Integer.parseInt(nStr);
-            if (n < 1 || n > tasks.size()) { box(" Invalid task number: " + nStr); return; }
-            Task t = tasks.get(n - 1);
-            t.done = mark;
-            box(mark ? " Nice! I've marked this task as done:"
-                            : " OK, I've marked this task as not done yet:",
-                    "   " + t.display());
-        } catch (NumberFormatException e) {
-            box(" Not a valid number: \"" + nStr + "\"");
-        }
     }
 
     private static void box(String... lines) {
