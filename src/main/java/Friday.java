@@ -1,10 +1,16 @@
 import java.nio.file.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 import java.nio.charset.StandardCharsets;
 import java.io.IOException;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 
 /**
  * Friday: a Personal Assistant Chatbot that helps a person keep track of various things
@@ -25,6 +31,35 @@ public class Friday {
     // Horizontal divider
     private static final String LINE = "____________________________________________________________";
 
+    private static final DateTimeFormatter OUT_DATE = DateTimeFormatter.ofPattern("MMM d yyyy");
+    private static final DateTimeFormatter OUT_DT   = DateTimeFormatter.ofPattern("MMM d yyyy, h:mma");
+
+    /** Flexible parser: yyyy-MM-dd[ HHmm] or d/M/yyyy[ HHmm]; date-only -> 00:00 */
+    private static LocalDateTime parseDT(String s) throws FridayException {
+        s = s.trim();
+        for (String p : new String[] {"yyyy-MM-dd HHmm",
+                "yyyy-MM-dd","d/M/yyyy HHmm","d/M/yyyy"}) {
+            DateTimeFormatter f = DateTimeFormatter.ofPattern(p);
+            try {
+                return p.contains("HHmm")
+                        ? LocalDateTime.parse(s, f)
+                        : LocalDate.parse(s, f).atStartOfDay();
+            } catch (DateTimeParseException ignored) { }
+        }
+        throw new FridayException("Cannot parse date/time. Use yyyy-MM-dd[ HHmm] or d/M/yyyy[ HHmm].");
+    }
+    private static String fmt(LocalDateTime dt) {
+        return (dt.getHour()==0 && dt.getMinute()==0) ? dt.toLocalDate().format(OUT_DATE) : dt.format(OUT_DT);
+    }
+
+    /** Parse ISO strings from storage; fall back to flexible. */
+    private static LocalDateTime parseIsoOrFlexible(String s) {
+        try { return LocalDateTime.parse(s); } catch (Exception ignored) {}
+        try { return LocalDate.parse(s).atStartOfDay(); } catch (Exception ignored) {}
+        try { return parseDT(s); } catch (Exception ignored) {}
+        return LocalDate.of(1970,1,1).atStartOfDay(); // last-resort (line will still show)
+    }
+
     /**
      * Base task model with description and completion flag.
      * Subclasses provide the task type and optional extra display info.
@@ -32,19 +67,31 @@ public class Friday {
     private static abstract class Task {
         final String desc;
         boolean done;
-        Task(String d) { this.desc = d; }
+        Task(String d) {
+            this.desc = d;
+        }
         abstract String typeIcon();
-        String statusIcon() { return done ? "[X]" : "[ ]"; }
-        String extra() { return ""; }
-        String display() { return typeIcon() + statusIcon() + " " + desc + extra(); }
+        String statusIcon() {
+            return done ? "[X]" : "[ ]";
+        }
+        String extra() {
+            return "";
+        }
+        String display() {
+            return typeIcon() + statusIcon() + " " + desc + extra();
+        }
 
         /** Encode one line: TYPE | done(0/1) | desc [| time(s)] */
-        String toStorage() { return String.format("%s | %d | %s", typeIcon().substring(1,2), done ? 1 : 0, desc); }
+        String toStorage() {
+            return String.format("%s | %d | %s", typeIcon().substring(1,2), done ? 1 : 0, desc);
+        }
 
         /** Parse one storage line back into a Task. */
         static Task fromStorage(String line) {
-            String[] p = line.split("\\s*\\|\\s*", 4); // allow time field
-            if (p.length < 3) throw new IllegalArgumentException("Bad line: " + line);
+            String[] p = line.split("\\s*\\|\\s*");
+            if (p.length < 3) {
+                throw new IllegalArgumentException("Bad line: " + line);
+            }
             String type = p[0], doneStr = p[1], desc = p[2];
             boolean done = "1".equals(doneStr);
             Task t;
@@ -53,15 +100,16 @@ public class Friday {
                 t = new ToDo(desc);
                 break;
             case "D":
-                if (p.length < 4) throw new IllegalArgumentException("Deadline missing time: " + line);
-                t = new Deadline(desc, p[3]);
+                if (p.length < 4) {
+                    throw new IllegalArgumentException("Deadline missing time: " + line);
+                }
+                t = new Deadline(desc, parseIsoOrFlexible(p[3]));
                 break;
             case "E":
-                if (p.length < 4) throw new IllegalArgumentException("Event missing time: " + line);
-                // For events we stored a single “from..to..” string in p[3]
-                String time = p[3];
-                // optional: split back to from/to if you prefer (not strictly needed for display)
-                t = new Event(desc, time, ""); // or keep a single field variant
+                if (p.length < 5) {
+                    throw new IllegalArgumentException("Event missing time: " + line);
+                }
+                t = new Event(desc, parseIsoOrFlexible(p[3]), parseIsoOrFlexible(p[4]));
                 break;
             default:
                 throw new IllegalArgumentException("Unknown type: " + type);
@@ -73,35 +121,52 @@ public class Friday {
 
     /** To-do task without time information. */
     private static class ToDo extends Task {
-        ToDo(String d) { super(d); }
-        String typeIcon() { return "[T]"; }
+        ToDo(String d) {
+            super(d);
+        }
+        String typeIcon() {
+            return "[T]";
+        }
     }
 
     /** Deadline task by a certain time */
     private static class Deadline extends Task {
-        final String by;
-        Deadline(String d, String by) {
+        final LocalDateTime due;
+        Deadline(String d, LocalDateTime due) {
             super(d);
-            this.by = by;
+            this.due = due;
         }
-        String typeIcon() { return "[D]"; }
-        String extra() { return " (by: " + by + ")"; }
+        String typeIcon() {
+            return "[D]";
+        }
+        String extra() {
+            return " (by: " + fmt(due) + ")";
+        }
 
         @Override
         String toStorage() {
-            return String.format("D | %d | %s | %s", done ? 1 : 0, desc, by);
+            return String.format("D | %d | %s | %s", done ? 1 : 0, desc, due);
         }
     }
 
     /** Event task with a start and end time */
     private static class Event extends Task {
-        final String from, to;
-        Event(String d, String from, String to) { super(d); this.from = from; this.to = to; }
-        String typeIcon() { return "[E]"; }
-        String extra() { return " (from: " + from + " to: " + to + ")"; }
+        final LocalDateTime from, to;
+        Event(String d, LocalDateTime from, LocalDateTime to) {
+            super(d);
+            this.from = from;
+            this.to = to;
+        }
+        String typeIcon() {
+            return "[E]";
+        }
+        String extra() {
+            return " (from: " + fmt(from) + " to: " + fmt(to) + ")";
+        }
         @Override
         String toStorage() {
-            return String.format("E | %d | %s | %s to %s", done ? 1 : 0, desc, from, to);
+            return String.format("E | %d | %s | %s | %s",
+                    done ? 1 : 0, desc, from, to);
         }
     }
 
@@ -109,7 +174,7 @@ public class Friday {
     private static final List<Task> tasks = new ArrayList<>();
 
     /** txt file containing tasks created. */
-    private static final Path FILE_PATH = Paths.get("data", "texts.txt");
+    private static final Path FILE_PATH = Paths.get("data", "tasks.txt");
 
     /** Ensure parent folder exists (e.g., data/). */
     private static void ensureParentDir() throws IOException {
@@ -195,7 +260,7 @@ public class Friday {
     }
 
     /** Removes a task from List, throws exception if input is invalid. */
-    private static void removeEvent(String cmd) throws FridayException{
+    private static void removeEvent(String cmd) throws FridayException, IOException {
         String index = cmd.substring(6).trim();
         int n;
         try {
@@ -208,6 +273,7 @@ public class Friday {
         }
         Task toRemove = tasks.get(n - 1);
         tasks.remove(n - 1);
+        updateTasks();
         box("Noted. I've removed this task:",
                 toRemove.display(),
                 "Now you have " + tasks.size() + " tasks in the list.");
@@ -220,7 +286,6 @@ public class Friday {
             throw new FridayException("Walao how can a task be empty OII!");
         }
         addTask(new ToDo(desc));
-        updateFile();
     }
 
     /** Adds a deadline Task to List, throws exception if input is invalid. */
@@ -230,12 +295,11 @@ public class Friday {
         int i = rest.indexOf("/by");
         if (i < 0) throw new FridayException("Eh you blur or what where's your deadline");
         String desc = rest.substring(0, i).trim();
-        String by = rest.substring(i + 3).trim();
-        if (desc.isEmpty() || by.isEmpty()) {
+        String due = rest.substring(i + 3).trim();
+        if (desc.isEmpty() || due.isEmpty()) {
             throw new FridayException("Walao do you know how to fill in a deadline or not");
         }
-        addTask(new Deadline(desc, by));
-        updateFile();
+        addTask(new Deadline(desc, parseDT(due)));
     }
 
     /** Adds an event Task to List, throws exception if input is invalid. */
@@ -253,8 +317,7 @@ public class Friday {
         if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
             throw new FridayException("Bro you know how to give event time or not");
         }
-        addTask(new Event(desc, from, to));
-        updateFile();
+        addTask(new Event(desc, parseDT(from), parseDT(to)));
     }
 
     /** Toggles completion status of task in List, throws exception if input is invalid. */
@@ -280,8 +343,9 @@ public class Friday {
 
     // ----- Helpers -----
 
-    private static void addTask(Task t) {
+    private static void addTask(Task t) throws IOException {
         tasks.add(t);
+        updateTasks();
         box(" Got it. I've added this task:",
                 "   " + t.display(),
                 " Now you have " + tasks.size() + " tasks in the list.");
@@ -291,14 +355,5 @@ public class Friday {
         System.out.println(LINE);
         for (String l : lines) System.out.println(l);
         System.out.println(LINE);
-    }
-
-    /** Saves the task into task.txt */
-    private static void updateFile() throws IOException {
-        if (!Files.exists(FILE_PATH)) {
-            Files.createFile(FILE_PATH);
-        }
-
-        Files.write(FILE_PATH, (Iterable<? extends CharSequence>) tasks, StandardCharsets.UTF_8, (OpenOption) StandardOpenOption.TRUNCATE_EXISTING);
     }
 }
