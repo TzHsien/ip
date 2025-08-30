@@ -8,16 +8,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Consists of all methods that modify the task list.
+ */
 public class TaskList {
     private final List<Task> tasks = new ArrayList<>();
 
     public List<Task> all() {
         return tasks;
     }
+
     public void setAll(List<Task> newTasks) {
         tasks.clear();
         tasks.addAll(newTasks);
     }
+
     public Task get(int oneBased) throws FridayException {
         int i = oneBased - 1;
         if (i < 0 || i >= tasks.size()) {

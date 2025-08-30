@@ -3,6 +3,9 @@ package friday.model;
 import friday.logic.Parser;
 import java.time.LocalDateTime;
 
+/**
+ * A {@link friday.model.Task} that spans a start and end date/time.
+ */
 public class Event extends Task {
     final LocalDateTime from, to;
     public Event(String d, LocalDateTime from, LocalDateTime to) {

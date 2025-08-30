@@ -3,6 +3,9 @@ package friday.model;
 import friday.logic.Parser;
 import java.time.LocalDateTime;
 
+/**
+ * A {@link friday.model.Task} with a deadline.
+ */
 public class Deadline extends Task {
     final LocalDateTime due;
     public Deadline(String d, LocalDateTime due) {
