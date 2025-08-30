@@ -1,3 +1,7 @@
+package friday.model;
+
+import friday.logic.Parser;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -19,16 +23,16 @@ public abstract class Task {
     String extra() {
         return "";
     }
-    String display() {
+    public String display() {
         return typeIcon() + statusIcon() + " " + desc + extra();
     }
 
     /** Encode: TYPE | done(0/1) | desc [| time(s)] */
-    String toStorage() {
+    public String toStorage() {
         return String.format("%s | %d | %s", typeIcon().substring(1,2), done ? 1 : 0, desc);
     }
 
-    static Task fromStorage(String line) {
+    public static Task fromStorage(String line) {
         String[] p = line.split("\\s*\\|\\s*");
         if (p.length < 3) {
             throw new IllegalArgumentException("Bad line: " + line);
@@ -39,12 +43,12 @@ public abstract class Task {
         case "T": t = new ToDo(desc); break;
         case "D":
             if (p.length < 4) {
-                throw new IllegalArgumentException("Deadline missing time: " + line);
+                throw new IllegalArgumentException("friday.model.Deadline missing time: " + line);
             }
             t = new Deadline(desc, parseIsoOrFlexible(p[3])); break;
         case "E":
             if (p.length < 5) {
-                throw new IllegalArgumentException("Event missing time: " + line);
+                throw new IllegalArgumentException("friday.model.Event missing time: " + line);
             }
             t = new Event(desc, parseIsoOrFlexible(p[3]), parseIsoOrFlexible(p[4])); break;
         default: throw new IllegalArgumentException("Unknown type: " + type);
@@ -53,7 +57,7 @@ public abstract class Task {
         return t;
     }
 
-    // ISO or fallback used by storage:
+    // ISO or fallback used by friday.storage:
     private static LocalDateTime parseIsoOrFlexible(String s) {
         try {
             return LocalDateTime.parse(s);
@@ -67,49 +71,4 @@ public abstract class Task {
         return LocalDate.of(1970,1,1).atStartOfDay();
     }
 }
-
-class ToDo extends Task {
-    ToDo(String d) {
-        super(d);
-    }
-    String typeIcon() {
-        return "[T]";
-    }
-}
-
-class Deadline extends Task {
-    final LocalDateTime due;
-    Deadline(String d, LocalDateTime due) {
-        super(d);
-        this.due = due;
-    }
-    String typeIcon() {
-        return "[D]";
-    }
-    String extra() {
-        return " (by: " + Parser.formatForDisplay(due) + ")";
-    }
-    @Override String toStorage() {
-        return String.format("D | %d | %s | %s", done ? 1 : 0, desc, due);
-    }
-}
-
-class Event extends Task {
-    final LocalDateTime from, to;
-    Event(String d, LocalDateTime from, LocalDateTime to) {
-        super(d);
-        this.from = from;
-        this.to = to;
-    }
-    String typeIcon() {
-        return "[E]";
-    }
-    String extra() {
-        return " (from: " + Parser.formatForDisplay(from) + " to: " + Parser.formatForDisplay(to) + ")";
-    }
-    @Override String toStorage() {
-        return String.format("E | %d | %s | %s | %s", done ? 1 : 0, desc, from, to);
-    }
-}
-
 

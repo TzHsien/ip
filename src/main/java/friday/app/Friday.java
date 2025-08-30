@@ -1,8 +1,16 @@
+package friday.app;
+
 import java.nio.file.Paths;
 import java.util.Scanner;
+import friday.ui.Ui;
+import friday.storage.Storage;
+import friday.logic.Parser;
+import friday.model.TaskList;
+import friday.exception.FridayException;
+
 
 /**
- * Friday: a Personal Assistant Chatbot that helps a person keep track of various things
+ * friday.app.Friday: a Personal Assistant Chatbot that helps a person keep track of various things
  * <p>
  * Supported commands:
  * <ul>

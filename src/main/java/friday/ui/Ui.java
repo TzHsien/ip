@@ -1,7 +1,11 @@
+package friday.ui;
+
 import java.util.List;
 
+import friday.model.Task;
+
 /**
- * All printing and reading functions are handled by Ui class.
+ * All printing and reading functions are handled by friday.app.Ui.friday.app.Ui class.
  */
 public class Ui {
     private static final String LINE = "____________________________________________________________";
@@ -15,7 +19,7 @@ public class Ui {
 
     public void error(String msg) { box(" " + msg); }
 
-    /** Returns a TaskList which contains all of the Tasks created. */
+    /** Returns a friday.model.TaskList which contains all the Tasks created. */
     public void showList(List<Task> tasks) {
         if (tasks.isEmpty()) {
             box(" (no items yet)");
@@ -29,25 +33,25 @@ public class Ui {
         box(lines);
     }
 
-    /** Acknowledges that a Task has been added to TaskList. */
+    /** Acknowledges that a friday.model.Task has been added to friday.model.TaskList. */
     public void added(Task t, int size) {
         box(" Got it. I've added this task:",
                 "   " + t.display(), " Now you have " + size + " tasks in the list.");
     }
 
-    /** Acknowledges that a Task has been removed from TaskList, based on Task number. */
+    /** Acknowledges that a friday.model.Task has been removed from friday.model.TaskList, based on friday.model.Task number. */
     public void removed(Task t, int size) {
         box(" Noted. I've removed this task:",
                 "   " + t.display(), " Now you have " + size + " tasks in the list.");
     }
 
-    /** Acknowledges that a Task status has been updated in TaskList. */
+    /** Acknowledges that a friday.model.Task status has been updated in friday.model.TaskList. */
     public void toggled(Task t, boolean marked) {
         box(marked ? " Nice! I've marked this task as done:" :
                         " OK, I've marked this task as not done yet:", "   " + t.display());
     }
 
-    /** Formats Friday's response by sandwiching her response in between two lines. */
+    /** Formats friday.app.Friday's response by sandwiching her response in between two lines. */
     private void box(String... lines) {
         System.out.println(LINE);
         for (String l : lines) System.out.println(l);

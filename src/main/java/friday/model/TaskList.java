@@ -1,3 +1,9 @@
+package friday.model;
+
+import friday.ui.Ui;
+import friday.storage.Storage;
+import friday.exception.FridayException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

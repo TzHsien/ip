@@ -1,3 +1,14 @@
+package friday.logic;
+
+import friday.model.Deadline;
+import friday.model.ToDo;
+import friday.model.Event;
+import friday.ui.Ui;
+import friday.storage.Storage;
+import friday.exception.FridayException;
+
+import friday.model.TaskList;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -8,7 +19,7 @@ public class Parser {
     private static final DateTimeFormatter OUT_DT   = DateTimeFormatter.ofPattern("MMM d yyyy, h:mma");
 
     /** yyyy-MM-dd[ HHmm] or d/M/yyyy[ HHmm]; date-only -> 00:00 */
-    static LocalDateTime parseDT(String s) throws FridayException {
+    public static LocalDateTime parseDT(String s) throws FridayException {
         s = s.trim();
         for (String p : new String[]{"yyyy-MM-dd HHmm","yyyy-MM-dd","d/M/yyyy HHmm","d/M/yyyy"}) {
             DateTimeFormatter f = DateTimeFormatter.ofPattern(p);
@@ -48,7 +59,7 @@ public class Parser {
         if (cmd.startsWith("todo")) {
             String desc = cmd.substring(4).trim();
             if (desc.isEmpty()) {
-                throw new FridayException("Task description cannot be empty.");
+                throw new FridayException("friday.model.Task description cannot be empty.");
             }
             tasks.add(new ToDo(desc), ui, storage);
             return false;
@@ -88,8 +99,8 @@ public class Parser {
         throw new FridayException("What talk you bro");
     }
 
-    // expose formatters to Task subclasses:
-    static String formatForDisplay(LocalDateTime dt) {
+    // expose formatters to friday.model.Task subclasses:
+    public static String formatForDisplay(LocalDateTime dt) {
         return fmt(dt);
     }
 }
