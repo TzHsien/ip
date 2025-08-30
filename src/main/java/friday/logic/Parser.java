@@ -6,7 +6,6 @@ import friday.model.Event;
 import friday.ui.Ui;
 import friday.storage.Storage;
 import friday.exception.FridayException;
-
 import friday.model.TaskList;
 
 import java.time.LocalDate;
@@ -23,8 +22,9 @@ public class Parser {
         s = s.trim();
         for (String p : new String[]{"yyyy-MM-dd HHmm","yyyy-MM-dd","d/M/yyyy HHmm","d/M/yyyy"}) {
             DateTimeFormatter f = DateTimeFormatter.ofPattern(p);
-            try { return p.contains("HHmm") ? LocalDateTime.parse(s, f) : LocalDate.parse(s, f).atStartOfDay(); }
-            catch (DateTimeParseException ignored) {}
+            try {
+                return p.contains("HHmm") ? LocalDateTime.parse(s, f) : LocalDate.parse(s, f).atStartOfDay();
+            } catch (DateTimeParseException ignored) {}
         }
         throw new FridayException("Cannot parse date/time. Use yyyy-MM-dd[ HHmm] or d/M/yyyy[ HHmm].");
     }
