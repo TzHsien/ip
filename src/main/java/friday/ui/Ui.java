@@ -57,4 +57,17 @@ public class Ui {
         for (String l : lines) System.out.println(l);
         System.out.println(LINE);
     }
+
+    public void showMatches(List<Task> matches) {
+        if (matches.isEmpty()) {
+            box(" You have no task containing this keyword");
+            return;
+        }
+        String[] lines = new String[matches.size() + 1];
+        lines[0] = " Here are the tasks in your list containing this keyword:";
+        for (int i = 0; i< matches.size(); i++) {
+            lines[i + 1] = " " + (i + 1) + "." + matches.get(i).display();
+        }
+        box(lines);
+    }
 }

@@ -50,5 +50,14 @@ public class TaskList {
         storage.save(tasks);
         ui.toggled(t, mark);
     }
+
+    public List<Task> find(String keyword) {
+        String k = keyword.toLowerCase();
+        List<Task> out = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.matches(k)) out.add(t);
+        }
+        return out;
+    }
 }
 

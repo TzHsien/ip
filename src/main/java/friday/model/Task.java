@@ -73,5 +73,9 @@ public abstract class Task {
         } catch (Exception ignored) {}
         return LocalDate.of(1970,1,1).atStartOfDay();
     }
+
+    public boolean matches(String keyword) {
+        return desc.toLowerCase().contains(keyword.toLowerCase());
+    }
 }
 
