@@ -14,6 +14,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Contains the logic of {@link friday.app.Friday}
+ * Checks for proper formatting of input, if improper
+ * a {@link friday.exception.FridayException} will be thrown
+ * Else the stored list of tasks will be modified
+ * according to the input, either by adding or removing
+ * a task, or marking a task as complete/incomplete.
+ */
 public class Parser {
     private static final DateTimeFormatter OUT_DATE = DateTimeFormatter.ofPattern("MMM d yyyy");
     private static final DateTimeFormatter OUT_DT   = DateTimeFormatter.ofPattern("MMM d yyyy, h:mma");

@@ -5,7 +5,7 @@ import java.util.List;
 import friday.model.Task;
 
 /**
- * All printing and reading functions are handled by friday.app.Ui.friday.app.Ui class.
+ * All printing and reading functions are handled by friday.app.Ui class.
  */
 public class Ui {
     private static final String LINE = "____________________________________________________________";

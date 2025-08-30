@@ -8,6 +8,10 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Syncs the list of tasks saved previously in
+ * .data/tasks.txt and tasks newly created.
+ */
 public class Storage {
     private final Path file;
 

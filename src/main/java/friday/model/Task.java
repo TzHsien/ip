@@ -6,7 +6,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Contains the blueprint of all tasks that can be added, removed or marked.
+ * Contains the blueprint of all tasks (
+ * {@link friday.model.ToDo}, {@link friday.model.Deadline}
+ * , {@link friday.model.Event}) that can be added,
+ * removed or marked.
  */
 
 public abstract class Task {
