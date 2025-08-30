@@ -47,10 +47,10 @@ public class Friday {
                 if (exit) {
                     ui.bye(); break;
                 }
-            } catch (FridayException ex) {
-                ui.error(ex.getMessage());
-            } catch (Exception ex) {
-                ui.error("Unexpected error: " + ex.getMessage());
+            } catch (FridayException e) {
+                ui.error(e.getMessage());
+            } catch (Exception e) {
+                ui.error("Unexpected error: " + e.getMessage());
             }
         }
     }

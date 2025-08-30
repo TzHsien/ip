@@ -37,6 +37,7 @@ public class Parser {
         if (cmd.equals("bye")) {
             return true;
         }
+
         if (cmd.equals("list")) {
             ui.showList(tasks.all());
             return false;
@@ -93,6 +94,13 @@ public class Parser {
                 throw new FridayException("Provide desc, from, and to.");
             }
             tasks.add(new Event(desc, parseDT(from), parseDT(to)), ui, storage);
+            return false;
+        }
+
+        if (cmd.startsWith("find")) {
+            String keyword = cmd.substring(4).trim();
+            if (keyword.isEmpty()) throw new FridayException("Provide a keyword to find.");
+            ui.showMatches(tasks.find(keyword));
             return false;
         }
 
