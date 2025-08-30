@@ -41,16 +41,19 @@ public class Friday {
         Scanner sc = new Scanner(System.in);
         while (sc.hasNextLine()) {
             String line = sc.nextLine().trim();
-            if (line.isEmpty()) continue;
+            if (line.isEmpty()) {
+                continue;
+            }
             try {
                 boolean exit = parser.handle(line, tasks, ui, storage); // parse + execute
                 if (exit) {
-                    ui.bye(); break;
+                    ui.bye();
+                    break;
                 }
-            } catch (FridayException ex) {
-                ui.error(ex.getMessage());
-            } catch (Exception ex) {
-                ui.error("Unexpected error: " + ex.getMessage());
+            } catch (FridayException e) {
+                ui.error(e.getMessage());
+            } catch (Exception e) {
+                ui.error("Unexpected error: " + e.getMessage());
             }
         }
     }
