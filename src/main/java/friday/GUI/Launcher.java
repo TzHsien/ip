@@ -1,3 +1,5 @@
+package friday.GUI;
+
 import javafx.application.Application;
 
 /**
