@@ -32,6 +32,7 @@ public class TaskList {
     }
 
     public void add(Task t, Ui ui, Storage storage) throws IOException {
+        assert t != null;
         tasks.add(t);
         storage.save(tasks);
         ui.added(t, tasks.size());
