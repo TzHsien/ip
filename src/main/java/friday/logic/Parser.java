@@ -25,7 +25,10 @@ public class Parser {
     private static final DateTimeFormatter OUT_DATE = DateTimeFormatter.ofPattern("MMM d yyyy");
     private static final DateTimeFormatter OUT_DT   = DateTimeFormatter.ofPattern("MMM d yyyy, h:mma");
 
-    /** yyyy-MM-dd[ HHmm] or d/M/yyyy[ HHmm]; date-only -> 00:00 */
+    /**
+     * Converts 4 possible time inputs into a singular date-time format
+     * yyyy-MM-dd[ HHmm] or d/M/yyyy[ HHmm]; date-only -> 00:00
+     */
     public static LocalDateTime parseDT(String s) throws FridayException {
         s = s.trim();
         for (String p : new String[]{"yyyy-MM-dd HHmm","yyyy-MM-dd","d/M/yyyy HHmm","d/M/yyyy"}) {
@@ -36,11 +39,18 @@ public class Parser {
         }
         throw new FridayException("Cannot parse date/time. Use yyyy-MM-dd[ HHmm] or d/M/yyyy[ HHmm].");
     }
-    static String fmt(LocalDateTime dt) {
+    public static String formatForDisplay(LocalDateTime dt) {
         return (dt.getHour()==0 && dt.getMinute()==0) ? dt.toLocalDate().format(OUT_DATE) : dt.format(OUT_DT);
     }
 
-    /** Returns true if user asked to exit. */
+    /**
+     * Returns true if user asked to exit.
+     * @param cmd Input given by user
+     * @param tasks Most updated tasklist prior to processing user command
+     * @param ui User interface that user interacts with. Input and output through this interface
+     * @param storage txt file that stores tasklist outside of program. This ensures tasklist information
+     *                is not lost even after termination of program
+     */
     public boolean handle(String cmd, TaskList tasks, Ui ui, Storage storage) throws Exception {
         if (cmd.equals("bye")) {
             return true;
@@ -113,11 +123,6 @@ public class Parser {
         }
 
         throw new FridayException("What talk you bro");
-    }
-
-    // expose formatters to friday.model.Task subclasses:
-    public static String formatForDisplay(LocalDateTime dt) {
-        return fmt(dt);
     }
 }
 
