@@ -38,6 +38,7 @@ public class TaskList {
     }
 
     public void remove(int oneBased, Ui ui, Storage storage) throws FridayException, IOException {
+        assert get(oneBased) != null;
         Task t = get(oneBased);
         tasks.remove(oneBased - 1);
         storage.save(tasks);
@@ -45,6 +46,7 @@ public class TaskList {
     }
 
     public void toggle(int oneBased, boolean mark, Ui ui, Storage storage) throws FridayException, IOException {
+        assert get(oneBased) != null;
         Task t = get(oneBased);
         t.done = mark;
         storage.save(tasks);
