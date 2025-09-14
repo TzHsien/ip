@@ -36,6 +36,12 @@ public class Storage {
         return result;
     }
 
+    /**
+     * Saves the tasklist at the end of a program run into an external txt file, so that the tasklist
+     * is not lost when the program ends, and can be loaded again when the program is started up again.
+     * @param tasks Most updated taskList
+     * @throws IOException Throws exception
+     */
     public void save(List<Task> tasks) throws IOException {
         ensureParentDir();
         List<String> lines = new ArrayList<>(tasks.size());
