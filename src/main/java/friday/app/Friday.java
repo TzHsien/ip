@@ -57,4 +57,10 @@ public class Friday {
             }
         }
     }
+    /**
+     * Generates a response for the user's chat message.
+     */
+    public String getResponse(String input) {
+        return "Friday heard: " + input;
+    }
 }
