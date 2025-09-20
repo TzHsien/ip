@@ -62,5 +62,20 @@ public class TaskList {
         }
         return out;
     }
+
+    public void sortByType() {
+        tasks.sort((a, b) -> {
+            int pa = priority(a.typeIcon());
+            int pb = priority(b.typeIcon());
+            return Integer.compare(pa, pb);
+        });
+    }
+
+    private int priority(String typeIcon) {
+        if (typeIcon.startsWith("[D]")) return 1;  // Deadlines first
+        if (typeIcon.startsWith("[T]")) return 2;  // ToDos next
+        if (typeIcon.startsWith("[E]")) return 3;  // Events last
+        return 4; // fallback (unknown)
+    }
 }
 
