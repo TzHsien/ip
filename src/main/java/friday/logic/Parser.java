@@ -123,6 +123,11 @@ public class Parser {
             return false;
         }
 
+        if (cmd.startsWith("sort")) {
+            tasks.sortByType();
+            ui.showList(tasks.all());  // re-display sorted list
+            return false;
+        }
         throw new FridayException("What talk you bro");
     }
 }

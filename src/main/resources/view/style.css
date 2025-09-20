@@ -1,0 +1,47 @@
+/* Chat bubbles base style */
+.dialog-label {
+    -fx-background-radius: 15;
+    -fx-padding: 10;
+    -fx-wrap-text: true;
+    -fx-font-family: "Helvetica Neue", "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #000000;   /* darker black text */
+    -fx-font-weight: bold;    /* bold text */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 5, 0.3, 0, 2);
+}
+
+/* User bubble (light red) */
+.user-dialog {
+    -fx-background-color: #ffcdd2;  /* light red */
+}
+
+/* Friday bubble (light orange) */
+.friday-dialog {
+    -fx-background-color: #ffe0b2;  /* light orange */
+}
+
+/* Error bubble */
+.error-dialog {
+    -fx-background-color: #ef9a9a;
+    -fx-text-fill: #000000;
+    -fx-font-weight: bold;
+}
+
+/* Input field styling */
+#userInput {
+    -fx-background-radius: 8;
+    -fx-background-color: rgba(255,255,255,0.9);
+    -fx-font-size: 13px;
+    -fx-padding: 5;
+}
+
+/* Send button */
+#sendButton {
+    -fx-background-color: #3949ab;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-font-weight: bold;
+}
+#sendButton:hover {
+    -fx-background-color: #5c6bc0;
+}
