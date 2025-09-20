@@ -1,10 +1,1 @@
-D | 0 | study | 2025-11-02T00:00
-D | 0 | lunch | 2025-03-04T14:23
 T | 0 | sleep
-D | 0 | die | 2099-11-02T00:00
-T | 0 | study
-T | 0 | Attend CS2103 Tutorial
-D | 0 | CS2103 Quiz | 2025-09-05T16:00
-E | 0 | New Year's Party | 1999-12-31T00:00 | 2000-01-01T00:00
-D | 0 | Solve Extremis | 2000-01-01T00:00
-T | 0 | Maya Hansen

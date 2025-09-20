@@ -1,5 +1,7 @@
 package friday.app;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.nio.file.Paths;
 import java.util.Scanner;
 import friday.ui.Ui;
@@ -47,7 +49,6 @@ public class Friday {
             try {
                 boolean exit = parser.handle(line, tasks, ui, storage); // parse + execute
                 if (exit) {
-                    ui.bye();
                     break;
                 }
             } catch (FridayException e) {
@@ -58,9 +59,40 @@ public class Friday {
         }
     }
     /**
-     * Generates a response for the user's chat message.
+     * Generates a response for the user's chat message in GUI mode.
      */
     public String getResponse(String input) {
-        return "Friday heard: " + input;
+        Ui ui = new Ui();
+        Storage storage = new Storage(Paths.get("data", "tasks.txt"));
+        TaskList tasks = new TaskList();
+
+        try {
+            tasks.setAll(storage.load());                 // load on startup
+        } catch (Exception e) {
+            System.out.println("Failed to load file: " + e.getMessage());
+        }
+
+        Parser parser = new Parser();
+
+        // redirect System.out to capture prints, since existing code uses System.out.printl
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        PrintStream oldOut = System.out;
+        System.setOut(ps);
+
+        try {
+            parser.handle(input, tasks, ui, storage);   // may print or throw
+        } catch (FridayException e) {
+            // capture the exception’s message as the “response”
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            // catch any other unexpected exception
+            System.out.println(e.getMessage());
+        } finally {
+            System.out.flush();
+            System.setOut(oldOut);
+        }
+
+        return baos.toString().trim();
     }
 }

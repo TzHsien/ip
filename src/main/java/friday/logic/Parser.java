@@ -53,6 +53,7 @@ public class Parser {
      */
     public boolean handle(String cmd, TaskList tasks, Ui ui, Storage storage) throws Exception {
         if (cmd.equals("bye")) {
+            ui.bye();
             return true;
         }
 
